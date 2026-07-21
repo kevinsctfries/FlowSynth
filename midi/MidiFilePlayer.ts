@@ -1,5 +1,5 @@
 import { Midi } from "@tonejs/midi";
-import { Synth } from "./Synth";
+import { Synth } from "../synth/Synth";
 
 type MidiEvent = {
   time: number;

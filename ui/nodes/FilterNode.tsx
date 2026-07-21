@@ -1,7 +1,7 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { useContext, useState } from "react";
-import { SynthContext } from "../../audio/SynthContext";
-import { FilterModule } from "../../audio/modules/Filter";
+import { SynthContext } from "../../context/SynthContext";
+import { FilterModule } from "../../modules/Filter";
 import Knob from "../Knob";
 import "./Node.css";
 

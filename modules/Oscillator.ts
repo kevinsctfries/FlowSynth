@@ -1,5 +1,5 @@
-import { Module } from "../Module";
-import { Port } from "../Port";
+import { Module } from "../engine/Module";
+import { Port } from "../engine/Port";
 
 export class OscillatorModule extends Module {
   public readonly oscillator: OscillatorNode;

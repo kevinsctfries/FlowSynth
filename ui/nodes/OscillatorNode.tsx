@@ -2,9 +2,9 @@ import { Handle, Position, type NodeProps } from "@xyflow/react";
 
 import { useContext, useState } from "react";
 
-import { SynthContext } from "../../audio/SynthContext";
+import { SynthContext } from "../../context/SynthContext";
 
-import { OscillatorModule } from "../../audio/modules/Oscillator";
+import { OscillatorModule } from "../../modules/Oscillator";
 
 import Knob from "../Knob";
 

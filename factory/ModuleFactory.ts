@@ -1,14 +1,14 @@
-import { AudioEngine } from "./AudioEngine";
+import { AudioEngine } from "../engine/AudioEngine";
 
-import { Module } from "./Module";
+import { Module } from "../engine/Module";
 
-import { OscillatorModule } from "./modules/Oscillator";
+import { OscillatorModule } from "../modules/Oscillator";
 
-import { OutputModule } from "./modules/Output";
+import { OutputModule } from "../modules/Output";
 
-import { GainModule } from "./modules/Gain";
+import { GainModule } from "../modules/Gain";
 
-import { FilterModule } from "./modules/Filter";
+import { FilterModule } from "../modules/Filter";
 
 export function createModule(
   type: string,

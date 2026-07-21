@@ -1,4 +1,4 @@
-import { MidiFilePlayer } from "../audio/MidiFilePlayer";
+import { MidiFilePlayer } from "../midi/MidiFilePlayer";
 
 export function createMidiControls(player: MidiFilePlayer) {
   const container = document.createElement("div");

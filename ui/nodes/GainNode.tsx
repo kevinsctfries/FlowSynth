@@ -1,7 +1,7 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { useContext, useState } from "react";
-import { SynthContext } from "../../audio/SynthContext";
-import { GainModule } from "../../audio/modules/Gain";
+import { SynthContext } from "../../context/SynthContext";
+import { GainModule } from "../../modules/Gain";
 import Knob from "../Knob";
 
 import "./Node.css";

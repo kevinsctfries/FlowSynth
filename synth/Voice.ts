@@ -1,10 +1,10 @@
-import { AudioEngine } from "./AudioEngine";
-import { Patch } from "./Patch";
+import { AudioEngine } from "../engine/AudioEngine";
+import { Patch } from "../engine/Patch";
 
-import { OscillatorModule } from "./modules/Oscillator";
-import { FilterModule } from "./modules/Filter";
-import { GainModule } from "./modules/Gain";
-import { EnvelopeModule } from "./modules/Envelope";
+import { OscillatorModule } from "../modules/Oscillator";
+import { FilterModule } from "../modules/Filter";
+import { GainModule } from "../modules/Gain";
+import { EnvelopeModule } from "../modules/Envelope";
 
 export class Voice {
   private oscillator: OscillatorModule;

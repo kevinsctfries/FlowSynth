@@ -1,4 +1,4 @@
-import { Synth } from "../audio/Synth";
+import { Synth } from "../synth/Synth";
 
 function createSlider(
   label: string,

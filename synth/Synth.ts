@@ -1,6 +1,6 @@
-import { AudioEngine } from "./AudioEngine";
+import { AudioEngine } from "../engine/AudioEngine";
+import { OutputModule } from "../modules/Output";
 import { Voice } from "./Voice";
-import { OutputModule } from "./modules/Output";
 
 type VoiceMode = "mono" | "poly";
 

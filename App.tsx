@@ -14,11 +14,11 @@ import "@xyflow/react/dist/style.css";
 
 import { useEffect, useState, useRef } from "react";
 
-import { AudioEngine } from "./audio/AudioEngine";
+import { AudioEngine } from "./engine/AudioEngine";
 
-import { Patch } from "./audio/Patch";
+import { Patch } from "./engine/Patch";
 
-import { SynthContext } from "./audio/SynthContext";
+import { SynthContext } from "./context/SynthContext";
 
 import OscillatorNode from "./ui/nodes/OscillatorNode";
 import OutputNode from "./ui/nodes/OutputNode";
