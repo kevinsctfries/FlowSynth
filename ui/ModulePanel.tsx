@@ -33,7 +33,7 @@ export default function ModulePanel({ onAddModule }: ModulePanelProps) {
 
       <button onClick={() => onAddModule("oscillator")}>Oscillator</button>
 
-      <button onClick={() => onAddModule("gain")}>Gain</button>
+      <button onClick={() => onAddModule("vca")}>VCA</button>
 
       <button onClick={() => onAddModule("output")}>Output</button>
 

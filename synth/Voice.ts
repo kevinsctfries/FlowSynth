@@ -3,7 +3,7 @@ import { Patch } from "../engine/Patch";
 
 import { OscillatorModule } from "../modules/Oscillator";
 import { FilterModule } from "../modules/Filter";
-import { GainModule } from "../modules/Gain";
+import { GainModule } from "../modules/VCA";
 import { EnvelopeModule } from "../modules/Envelope";
 
 export class Voice {

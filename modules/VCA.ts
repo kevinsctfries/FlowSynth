@@ -2,13 +2,13 @@ import { Module } from "../engine/Module";
 import { Port } from "../engine/Port";
 import { Parameter } from "../engine/Parameter";
 
-export class GainModule extends Module {
+export class VCAModule extends Module {
   public readonly gain: GainNode;
 
   public readonly level: Parameter<number>;
 
   constructor(id: string, ctx: AudioContext) {
-    super(id, "Gain");
+    super(id, "VCA");
 
     this.gain = ctx.createGain();
 
@@ -17,7 +17,7 @@ export class GainModule extends Module {
     this.level = this.registerParameter(
       new Parameter({
         id: "level",
-        name: "Gain",
+        name: "Level",
         type: "number",
         value: 1,
         min: 0,
@@ -42,8 +42,8 @@ export class GainModule extends Module {
 
     this.ports.push(
       new Port({
-        id: "gain_cv",
-        name: "Gain CV",
+        id: "cv_in",
+        name: "CV Input",
         type: "control",
         direction: "input",
 
@@ -52,6 +52,7 @@ export class GainModule extends Module {
         },
       }),
     );
+
     this.ports.push(
       new Port({
         id: "audio_out",

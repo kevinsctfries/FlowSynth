@@ -22,7 +22,7 @@ import { SynthContext } from "./context/SynthContext";
 
 import OscillatorNode from "./ui/nodes/OscillatorNode";
 import OutputNode from "./ui/nodes/OutputNode";
-import GainNode from "./ui/nodes/GainNode";
+import VCANode from "./ui/nodes/VCANode";
 import FilterNode from "./ui/nodes/FilterNode";
 import ModulePanel from "./ui/ModulePanel";
 import EnvelopeNode from "./ui/nodes/EnvelopeNode";
@@ -30,7 +30,7 @@ import GateInputNode from "./ui/nodes/GateInputNode";
 
 const nodeTypes = {
   oscillator: OscillatorNode,
-  gain: GainNode,
+  vca: VCANode,
   filter: FilterNode,
   output: OutputNode,
   envelope: EnvelopeNode,
