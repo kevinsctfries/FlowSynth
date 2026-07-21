@@ -1,7 +1,7 @@
 import { AudioEngine } from "./AudioEngine";
 import { Module } from "./Module";
 import { Connection } from "./Connection";
-import { createModule } from "../audio/ModuleFactory";
+import { createModule } from "../factory/ModuleFactory";
 
 export class Patch {
   private engine: AudioEngine;
