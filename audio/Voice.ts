@@ -19,14 +19,17 @@ export class Voice {
 
   private active = false;
 
-  constructor(engine: AudioEngine, output: AudioNode) {
-    this.patch = new Patch();
+  constructor(engine: AudioEngine, index: number, output: AudioNode) {
+    this.patch = new Patch(engine);
 
-    this.oscillator = new OscillatorModule(engine.context);
+    this.oscillator = new OscillatorModule(
+      `voice-${index}-oscillator`,
+      engine.context,
+    );
 
-    this.filter = new FilterModule(engine.context);
+    this.filter = new FilterModule(`voice-${index}-filter`, engine.context);
 
-    this.gain = new GainModule(engine.context);
+    this.gain = new GainModule(`voice-${index}-gain`, engine.context);
 
     this.envelope = new EnvelopeModule(engine.context);
 
@@ -36,15 +39,18 @@ export class Voice {
 
     this.patch.addModule(this.gain);
 
-    this.patch.connect(this.oscillator, this.filter);
+    this.patch.connect(
+      this.oscillator.id,
+      "audio_out",
+      this.filter.id,
+      "audio_in",
+    );
 
-    this.patch.connect(this.filter, this.gain);
+    this.patch.connect(this.filter.id, "audio_out", this.gain.id, "audio_in");
 
-    this.gain.connect(output);
+    this.gain.gain.connect(output);
 
-    this.envelope.connect(this.gain.volume);
-
-    this.oscillator.start();
+    this.envelope.connect(this.gain.gainParam);
   }
 
   noteOn(note: number, velocity: number) {
@@ -54,15 +60,11 @@ export class Voice {
 
     this.envelope.trigger(velocity / 127);
 
-    this.gain.open(velocity / 127);
-
     this.active = true;
   }
 
   noteOff() {
     this.envelope.releaseNote();
-
-    this.gain.close();
 
     this.active = false;
   }

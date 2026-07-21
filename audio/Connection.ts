@@ -11,33 +11,27 @@ export class Connection {
     this.destination = destination;
   }
 
-  connect() {
-    if (this.source.node && this.destination.node) {
-      this.source.node.connect(this.destination.node);
-
-      return;
+  private target(): AudioNode | AudioParam {
+    if (!this.source.node) {
+      throw new Error("Invalid connection");
     }
 
-    if (this.source.node && this.destination.parameter) {
-      this.source.node.connect(this.destination.parameter);
+    if (this.destination.node) {
+      return this.destination.node;
+    }
 
-      return;
+    if (this.destination.parameter) {
+      return this.destination.parameter;
     }
 
     throw new Error("Invalid connection");
   }
 
+  connect() {
+    this.source.node!.connect(this.target() as AudioNode);
+  }
+
   disconnect() {
-    if (this.source.node && this.destination.node) {
-      this.source.node.disconnect(this.destination.node);
-
-      return;
-    }
-
-    if (this.source.node && this.destination.parameter) {
-      this.source.node.disconnect(this.destination.parameter);
-
-      return;
-    }
+    this.source.node!.disconnect(this.target() as AudioNode);
   }
 }

@@ -1,5 +1,5 @@
 import { createContext } from "react";
 
-import { PatchManager } from "./PatchManager";
+import { Patch } from "./Patch";
 
-export const SynthContext = createContext<PatchManager | null>(null);
+export const SynthContext = createContext<Patch | null>(null);

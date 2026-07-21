@@ -25,4 +25,12 @@ export class OutputModule extends Module {
       }),
     );
   }
+
+  get input(): AudioNode {
+    return this.gain;
+  }
+
+  setVolume(value: number) {
+    this.gain.gain.setValueAtTime(value, this.gain.context.currentTime);
+  }
 }

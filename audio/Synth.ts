@@ -16,12 +16,10 @@ export class Synth {
   private output: OutputModule;
 
   constructor(engine: AudioEngine) {
-    this.output = new OutputModule(engine.context);
-
-    this.output.connect(engine.context.destination);
+    this.output = new OutputModule("synth-output", engine.context);
 
     for (let i = 0; i < this.maxVoices; i++) {
-      this.voices.push(new Voice(engine, this.output.input));
+      this.voices.push(new Voice(engine, i, this.output.input));
     }
   }
 

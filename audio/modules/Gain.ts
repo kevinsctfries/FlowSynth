@@ -47,4 +47,8 @@ export class GainModule extends Module {
       this.gain.context.currentTime,
     );
   }
+
+  get gainParam(): AudioParam {
+    return this.gain.gain;
+  }
 }

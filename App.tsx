@@ -16,7 +16,7 @@ import { useEffect, useState, useRef } from "react";
 
 import { AudioEngine } from "./audio/AudioEngine";
 
-import { PatchManager } from "./audio/PatchManager";
+import { Patch } from "./audio/Patch";
 
 import { SynthContext } from "./audio/SynthContext";
 
@@ -39,14 +39,14 @@ const nodeTypes = {
 export default function App() {
   const engineRef = useRef<AudioEngine | null>(null);
 
-  const patchRef = useRef<PatchManager | null>(null);
+  const patchRef = useRef<Patch | null>(null);
 
   if (!engineRef.current) {
     engineRef.current = new AudioEngine();
   }
 
   if (!patchRef.current) {
-    patchRef.current = new PatchManager(engineRef.current);
+    patchRef.current = new Patch(engineRef.current);
   }
 
   const engine = engineRef.current;
