@@ -1,11 +1,19 @@
+import { Port } from "./Port";
+
 export abstract class Module {
+  public readonly id: string;
+
   public readonly name: string;
 
-  constructor(name: string) {
+  public ports: Port[] = [];
+
+  constructor(id: string, name: string) {
+    this.id = id;
+
     this.name = name;
   }
 
-  abstract get input(): AudioNode | null;
-
-  abstract get output(): AudioNode | null;
+  getPort(id: string) {
+    return this.ports.find((port) => port.id === id);
+  }
 }

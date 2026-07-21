@@ -1,0 +1,28 @@
+.react-flow__node-output,
+.react-flow__node-oscillator {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.synth-node {
+  width: 180px;
+
+  padding: 15px;
+
+  background: #222;
+
+  color: white;
+
+  border-radius: 8px;
+
+  border: 1px solid #555;
+}
+
+.node-title {
+  font-size: 18px;
+
+  font-weight: bold;
+
+  margin-bottom: 10px;
+}

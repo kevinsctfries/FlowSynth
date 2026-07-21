@@ -1,29 +1,28 @@
 import { Module } from "../Module";
+import { Port } from "../Port";
 
 export class OutputModule extends Module {
   public readonly gain: GainNode;
 
-  constructor(ctx: AudioContext) {
-    super("Output");
+  constructor(id: string, ctx: AudioContext) {
+    super(id, "Output");
 
     this.gain = ctx.createGain();
 
-    this.gain.gain.value = 0.5;
-  }
+    this.gain.connect(ctx.destination);
 
-  get input() {
-    return this.gain;
-  }
+    this.ports.push(
+      new Port({
+        id: "audio_in",
 
-  get output() {
-    return this.gain;
-  }
+        name: "Audio Input",
 
-  connect(destination: AudioNode) {
-    this.gain.connect(destination);
-  }
+        type: "audio",
 
-  setVolume(value: number) {
-    this.gain.gain.setTargetAtTime(value, this.gain.context.currentTime, 0.01);
+        direction: "input",
+
+        node: this.gain,
+      }),
+    );
   }
 }

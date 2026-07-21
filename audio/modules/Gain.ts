@@ -1,60 +1,50 @@
 import { Module } from "../Module";
+import { Port } from "../Port";
 
 export class GainModule extends Module {
-  private node: GainNode;
+  public readonly gain: GainNode;
 
-  constructor(ctx: AudioContext) {
-    super("Gain");
+  constructor(id: string, ctx: AudioContext) {
+    super(id, "Gain");
 
-    this.node = ctx.createGain();
+    this.gain = ctx.createGain();
 
-    this.node.gain.value = 0.0001;
-  }
+    this.gain.gain.value = 1;
 
-  get input() {
-    return this.node;
-  }
+    this.ports.push(
+      new Port({
+        id: "audio_in",
 
-  get output() {
-    return this.node;
-  }
+        name: "Audio Input",
 
-  get volume() {
-    return this.node.gain;
-  }
+        type: "audio",
 
-  connect(destination: AudioNode) {
-    this.node.connect(destination);
-  }
+        direction: "input",
 
-  open(amount: number = 1) {
-    const now = this.node.context.currentTime;
+        node: this.gain,
+      }),
+    );
 
-    this.node.gain.cancelScheduledValues(now);
+    this.ports.push(
+      new Port({
+        id: "audio_out",
 
-    this.node.gain.setValueAtTime(Math.max(this.node.gain.value, 0.0001), now);
+        name: "Audio Output",
 
-    this.node.gain.exponentialRampToValueAtTime(
-      Math.max(amount, 0.0001),
-      now + 0.01,
+        type: "audio",
+
+        direction: "output",
+
+        node: this.gain,
+      }),
     );
   }
 
-  close() {
-    const now = this.node.context.currentTime;
+  setGain(value: number) {
+    this.gain.gain.setValueAtTime(
+      value,
 
-    this.node.gain.cancelScheduledValues(now);
-
-    this.node.gain.setValueAtTime(Math.max(this.node.gain.value, 0.0001), now);
-
-    this.node.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
-  }
-
-  setVolume(value: number) {
-    const now = this.node.context.currentTime;
-
-    this.node.gain.cancelScheduledValues(now);
-
-    this.node.gain.setTargetAtTime(Math.max(value, 0.0001), now, 0.01);
+      this.gain.context.currentTime,
+    );
   }
 }

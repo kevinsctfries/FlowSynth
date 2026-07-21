@@ -1,52 +1,44 @@
 import { Module } from "../Module";
+import { Port } from "../Port";
 
 export class OscillatorModule extends Module {
-  private oscillator: OscillatorNode;
+  public readonly oscillator: OscillatorNode;
 
-  private ctx: AudioContext;
-
-  constructor(ctx: AudioContext) {
-    super("Oscillator");
-
-    this.ctx = ctx;
+  constructor(id: string, ctx: AudioContext) {
+    super(id, "Oscillator");
 
     this.oscillator = ctx.createOscillator();
 
-    this.oscillator.type = "sine";
+    this.oscillator.type = "sawtooth";
 
     this.oscillator.frequency.value = 440;
-  }
 
-  start() {
     this.oscillator.start();
-  }
 
-  connect(destination: AudioNode) {
-    this.oscillator.connect(destination);
-  }
+    this.ports.push(
+      new Port({
+        id: "audio_out",
 
-  get input() {
-    return null;
-  }
+        name: "Audio Output",
 
-  get output() {
-    return this.oscillator;
-  }
+        type: "audio",
 
-  setFrequency(freq: number) {
-    const now = this.ctx.currentTime;
+        direction: "output",
 
-    this.oscillator.frequency.cancelScheduledValues(now);
-
-    this.oscillator.frequency.setValueAtTime(
-      this.oscillator.frequency.value,
-      now,
+        node: this.oscillator,
+      }),
     );
-
-    this.oscillator.frequency.exponentialRampToValueAtTime(freq, now + 0.01);
   }
 
-  setWaveform(type: OscillatorType) {
-    this.oscillator.type = type;
+  setFrequency(value: number) {
+    this.oscillator.frequency.setValueAtTime(
+      value,
+
+      this.oscillator.context.currentTime,
+    );
+  }
+
+  setWaveform(value: OscillatorType) {
+    this.oscillator.type = value;
   }
 }
