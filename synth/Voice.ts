@@ -1,10 +1,9 @@
 import { AudioEngine } from "../engine/AudioEngine";
 import { Patch } from "../engine/Patch";
-
-import { OscillatorModule } from "../modules/Oscillator";
+import { EnvelopeModule } from "../modules/Envelope";
 import { FilterModule } from "../modules/Filter";
 import { GainModule } from "../modules/Gain";
-import { EnvelopeModule } from "../modules/Envelope";
+import { OscillatorModule } from "../modules/Oscillator";
 
 export class Voice {
   private oscillator: OscillatorModule;
@@ -56,7 +55,7 @@ export class Voice {
   noteOn(note: number, velocity: number) {
     const frequency = 440 * Math.pow(2, (note - 69) / 12);
 
-    this.oscillator.setFrequency(frequency);
+    this.oscillator.frequency.setValue(frequency);
 
     this.envelope.trigger(velocity / 127);
 
@@ -90,14 +89,14 @@ export class Voice {
   }
 
   setWaveform(type: OscillatorType) {
-    this.oscillator.setWaveform(type);
+    this.oscillator.waveform.setValue(type);
   }
 
   setCutoff(value: number) {
-    this.filter.setCutoff(value);
+    this.filter.cutoff.setValue(value);
   }
 
   setResonance(value: number) {
-    this.filter.setResonance(value);
+    this.filter.resonance.setValue(value);
   }
 }

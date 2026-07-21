@@ -1,8 +1,11 @@
 import { Module } from "../engine/Module";
 import { Port } from "../engine/Port";
+import { Parameter } from "../engine/Parameter";
 
 export class GainModule extends Module {
   public readonly gain: GainNode;
+
+  public readonly level: Parameter<number>;
 
   constructor(id: string, ctx: AudioContext) {
     super(id, "Gain");
@@ -10,6 +13,22 @@ export class GainModule extends Module {
     this.gain = ctx.createGain();
 
     this.gain.gain.value = 1;
+
+    this.level = this.registerParameter(
+      new Parameter({
+        id: "level",
+        name: "Gain",
+        type: "number",
+        value: 1,
+        min: 0,
+        max: 1,
+        step: 0.01,
+      }),
+    );
+
+    this.level.onChange((value) => {
+      this.gain.gain.setValueAtTime(value, this.gain.context.currentTime);
+    });
 
     this.ports.push(
       new Port({
@@ -37,14 +56,6 @@ export class GainModule extends Module {
 
         node: this.gain,
       }),
-    );
-  }
-
-  setGain(value: number) {
-    this.gain.gain.setValueAtTime(
-      value,
-
-      this.gain.context.currentTime,
     );
   }
 
