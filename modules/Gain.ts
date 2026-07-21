@@ -33,27 +33,31 @@ export class GainModule extends Module {
     this.ports.push(
       new Port({
         id: "audio_in",
-
         name: "Audio Input",
-
         type: "audio",
-
         direction: "input",
-
         node: this.gain,
       }),
     );
 
     this.ports.push(
       new Port({
+        id: "gain_cv",
+        name: "Gain CV",
+        type: "control",
+        direction: "input",
+
+        controlHandler: (value) => {
+          this.gain.gain.setValueAtTime(value, this.gain.context.currentTime);
+        },
+      }),
+    );
+    this.ports.push(
+      new Port({
         id: "audio_out",
-
         name: "Audio Output",
-
         type: "audio",
-
         direction: "output",
-
         node: this.gain,
       }),
     );

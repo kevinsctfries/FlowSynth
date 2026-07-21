@@ -25,15 +25,16 @@ import OutputNode from "./ui/nodes/OutputNode";
 import GainNode from "./ui/nodes/GainNode";
 import FilterNode from "./ui/nodes/FilterNode";
 import ModulePanel from "./ui/ModulePanel";
+import EnvelopeNode from "./ui/nodes/EnvelopeNode";
+import GateInputNode from "./ui/nodes/GateInputNode";
 
 const nodeTypes = {
   oscillator: OscillatorNode,
-
   gain: GainNode,
-
   filter: FilterNode,
-
   output: OutputNode,
+  envelope: EnvelopeNode,
+  gate: GateInputNode,
 };
 
 export default function App() {
@@ -106,12 +107,9 @@ export default function App() {
 
     patch.connect(
       connection.source,
-
-      "audio_out",
-
+      connection.sourceHandle!,
       connection.target,
-
-      "audio_in",
+      connection.targetHandle!,
     );
 
     setEdges((current) => addEdge(connection, current));

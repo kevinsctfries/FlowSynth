@@ -74,6 +74,20 @@ export class Patch {
 
     connection.connect();
 
+    if (sourcePort.type === "gate" && targetPort.type === "gate") {
+      const sourceGate = sourceModule as Module & {
+        subscribe?: (callback: (value: boolean) => void) => () => void;
+      };
+
+      const targetGate = targetModule as Module & {
+        setGateState?: (value: boolean) => void;
+      };
+
+      if (sourceGate.subscribe && targetGate.setGateState) {
+        sourceGate.subscribe((value) => targetGate.setGateState?.(value));
+      }
+    }
+
     this.connections.push(connection);
 
     return connection;

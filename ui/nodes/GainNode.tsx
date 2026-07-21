@@ -19,9 +19,11 @@ export default function GainNode(props: NodeProps) {
         <ParameterControl key={parameter.id} parameter={parameter} />
       ))}
 
-      <Handle type="target" position={Position.Left} />
+      <Handle id="audio_in" type="target" position={Position.Left} />
 
-      <Handle type="source" position={Position.Right} />
+      <Handle id="audio_out" type="source" position={Position.Right} />
+
+      <Handle id="gain_cv" type="target" position={Position.Top} />
     </div>
   );
 }

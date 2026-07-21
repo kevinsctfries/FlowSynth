@@ -1,61 +1,144 @@
-export class EnvelopeModule {
+import { Module } from "../engine/Module";
+import { Parameter } from "../engine/Parameter";
+import { Port } from "../engine/Port";
+import { ControlSignal } from "../engine/Signal";
+
+export class EnvelopeModule extends Module {
   private ctx: AudioContext;
 
-  private destination?: AudioParam;
+  public readonly attack: Parameter<number>;
 
-  public attack = 0.1;
-  public decay = 0.2;
-  public sustain = 0.7;
-  public release = 0.5;
+  public readonly decay: Parameter<number>;
 
-  constructor(ctx: AudioContext) {
+  public readonly sustain: Parameter<number>;
+
+  public readonly release: Parameter<number>;
+
+  public readonly outputSignal = new ControlSignal();
+
+  constructor(id: string, ctx: AudioContext) {
+    super(id, "Envelope");
+
     this.ctx = ctx;
-  }
 
-  connect(destination: AudioParam) {
-    this.destination = destination;
-  }
+    this.attack = this.registerParameter(
+      new Parameter({
+        id: "attack",
+        name: "Attack",
+        type: "number",
+        value: 0.1,
+        min: 0,
+        max: 2,
+        step: 0.01,
+      }),
+    );
 
-  trigger(amount = 1) {
-    if (!this.destination) return;
+    this.decay = this.registerParameter(
+      new Parameter({
+        id: "decay",
+        name: "Decay",
+        type: "number",
+        value: 0.2,
+        min: 0,
+        max: 2,
+        step: 0.01,
+      }),
+    );
 
-    const now = this.ctx.currentTime;
+    this.sustain = this.registerParameter(
+      new Parameter({
+        id: "sustain",
+        name: "Sustain",
+        type: "number",
+        value: 0.7,
+        min: 0,
+        max: 1,
+        step: 0.01,
+      }),
+    );
 
-    this.destination.cancelScheduledValues(now);
+    this.release = this.registerParameter(
+      new Parameter({
+        id: "release",
+        name: "Release",
+        type: "number",
+        value: 0.5,
+        min: 0,
+        max: 3,
+        step: 0.01,
+      }),
+    );
 
-    this.destination.setValueAtTime(0, now);
+    this.ports.push(
+      new Port({
+        id: "gate_in",
+        name: "Gate Input",
+        type: "gate",
+        direction: "input",
 
-    this.destination.linearRampToValueAtTime(amount, now + this.attack);
+        gateHandler: (value) => {
+          this.setGateState(value);
+        },
+      }),
+    );
 
-    this.destination.linearRampToValueAtTime(
-      amount * this.sustain,
-      now + this.attack + this.decay,
+    this.ports.push(
+      new Port({
+        id: "cv_out",
+        name: "CV Output",
+        type: "control",
+        direction: "output",
+        signal: this.outputSignal,
+      }),
     );
   }
 
-  releaseNote() {
-    if (!this.destination) return;
+  // private emit(value: number) {
+  //   for (const listener of this.listeners) {
+  //     listener(value);
+  //   }
+  // }
 
+  private emit(value: number) {
+    console.log("Envelope CV output:", value);
+
+    this.outputSignal.emit(value);
+  }
+
+  // setGateState(value: boolean) {
+  //   if (value) {
+  //     this.trigger();
+  //   } else {
+  //     this.releaseNote();
+  //   }
+  // }
+
+  setGateState(value: boolean) {
+    console.log("Envelope gate received:", value);
+
+    if (value) {
+      this.trigger();
+      return;
+    }
+
+    this.releaseNote();
+  }
+
+  trigger(amount = 1) {
     const now = this.ctx.currentTime;
 
-    this.destination.cancelScheduledValues(now);
+    this.emit(0);
 
-    this.destination.setTargetAtTime(0, now, this.release);
+    setTimeout(() => {
+      this.emit(amount);
+
+      setTimeout(() => {
+        this.emit(amount * this.sustain.value);
+      }, this.decay.value * 1000);
+    }, this.attack.value * 1000);
   }
 
-  setAttack(value: number) {
-    this.attack = value;
-  }
-
-  setDecay(value: number) {
-    this.decay = value;
-  }
-
-  setSustain(value: number) {
-    this.sustain = value;
-  }
-
-  setRelease(value: number) {
-    this.release = value;
+  releaseNote() {
+    this.emit(0);
   }
 }

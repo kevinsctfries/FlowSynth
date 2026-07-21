@@ -8,7 +8,7 @@ export default function OutputNode() {
 
       <div>Audio Output</div>
 
-      <Handle type="target" position={Position.Left} />
+      <Handle id="audio_in" type="target" position={Position.Left} />
     </div>
   );
 }

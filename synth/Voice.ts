@@ -1,9 +1,10 @@
 import { AudioEngine } from "../engine/AudioEngine";
 import { Patch } from "../engine/Patch";
-import { EnvelopeModule } from "../modules/Envelope";
+
+import { OscillatorModule } from "../modules/Oscillator";
 import { FilterModule } from "../modules/Filter";
 import { GainModule } from "../modules/Gain";
-import { OscillatorModule } from "../modules/Oscillator";
+import { EnvelopeModule } from "../modules/Envelope";
 
 export class Voice {
   private oscillator: OscillatorModule;
@@ -30,13 +31,18 @@ export class Voice {
 
     this.gain = new GainModule(`voice-${index}-gain`, engine.context);
 
-    this.envelope = new EnvelopeModule(engine.context);
+    this.envelope = new EnvelopeModule(
+      `voice-${index}-envelope`,
+      engine.context,
+    );
 
     this.patch.addModule(this.oscillator);
 
     this.patch.addModule(this.filter);
 
     this.patch.addModule(this.gain);
+
+    this.patch.addModule(this.envelope);
 
     this.patch.connect(
       this.oscillator.id,
@@ -47,9 +53,9 @@ export class Voice {
 
     this.patch.connect(this.filter.id, "audio_out", this.gain.id, "audio_in");
 
-    this.gain.gain.connect(output);
+    this.patch.connect(this.envelope.id, "cv_out", this.gain.id, "gain_cv");
 
-    this.envelope.connect(this.gain.gainParam);
+    this.gain.gain.connect(output);
   }
 
   noteOn(note: number, velocity: number) {
@@ -73,19 +79,19 @@ export class Voice {
   }
 
   setAttack(value: number) {
-    this.envelope.setAttack(value);
+    this.envelope.attack.setValue(value);
   }
 
   setDecay(value: number) {
-    this.envelope.setDecay(value);
+    this.envelope.decay.setValue(value);
   }
 
   setSustain(value: number) {
-    this.envelope.setSustain(value);
+    this.envelope.sustain.setValue(value);
   }
 
   setRelease(value: number) {
-    this.envelope.setRelease(value);
+    this.envelope.release.setValue(value);
   }
 
   setWaveform(type: OscillatorType) {

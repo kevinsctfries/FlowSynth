@@ -38,6 +38,10 @@ export default function ModulePanel({ onAddModule }: ModulePanelProps) {
       <button onClick={() => onAddModule("output")}>Output</button>
 
       <button onClick={() => onAddModule("filter")}>Filter</button>
+
+      <button onClick={() => onAddModule("envelope")}>Envelope</button>
+
+      <button onClick={() => onAddModule("gate")}>Gate</button>
     </div>
   );
 }

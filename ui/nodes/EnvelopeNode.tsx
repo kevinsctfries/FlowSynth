@@ -2,24 +2,26 @@ import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { useContext } from "react";
 import ParameterControl from "../ParameterControl";
 import { SynthContext } from "../../context/SynthContext";
-import { OscillatorModule } from "../../modules/Oscillator";
+import { EnvelopeModule } from "../../modules/Envelope";
 
 import "./Node.css";
 
-export default function OscillatorNode(props: NodeProps) {
+export default function EnvelopeNode(props: NodeProps) {
   const patch = useContext(SynthContext);
 
-  const module = patch?.getModule(props.id) as OscillatorModule | undefined;
+  const module = patch?.getModule(props.id) as EnvelopeModule | undefined;
 
   return (
     <div className="synth-node">
-      <h3>Oscillator</h3>
+      <h3>Envelope</h3>
 
       {module?.parameters.map((parameter) => (
         <ParameterControl key={parameter.id} parameter={parameter} />
       ))}
 
-      <Handle id="audio_out" type="source" position={Position.Right} />
+      <Handle id="gate_in" type="target" position={Position.Left} />
+
+      <Handle id="cv_out" type="source" position={Position.Right} />
     </div>
   );
 }
