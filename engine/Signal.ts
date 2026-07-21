@@ -1,7 +1,7 @@
-export class ControlSignal {
-  private listeners: ((value: number) => void)[] = [];
+export class Signal<T> {
+  private listeners: ((value: T) => void)[] = [];
 
-  subscribe(callback: (value: number) => void) {
+  subscribe(callback: (value: T) => void) {
     this.listeners.push(callback);
 
     return () => {
@@ -11,9 +11,13 @@ export class ControlSignal {
     };
   }
 
-  emit(value: number) {
+  emit(value: T) {
     for (const listener of this.listeners) {
       listener(value);
     }
   }
 }
+
+export type ControlSignal = Signal<number>;
+
+export type GateSignal = Signal<boolean>;

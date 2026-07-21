@@ -3,16 +3,16 @@ import { Port } from "../engine/Port";
 import { Parameter } from "../engine/Parameter";
 
 export class VCAModule extends Module {
-  public readonly gain: GainNode;
+  public readonly node: GainNode;
 
   public readonly level: Parameter<number>;
 
   constructor(id: string, ctx: AudioContext) {
     super(id, "VCA");
 
-    this.gain = ctx.createGain();
+    this.node = ctx.createGain();
 
-    this.gain.gain.value = 1;
+    this.node.gain.value = 1;
 
     this.level = this.registerParameter(
       new Parameter({
@@ -27,7 +27,7 @@ export class VCAModule extends Module {
     );
 
     this.level.onChange((value) => {
-      this.gain.gain.setValueAtTime(value, this.gain.context.currentTime);
+      this.node.gain.setValueAtTime(value, this.node.context.currentTime);
     });
 
     this.ports.push(
@@ -36,7 +36,7 @@ export class VCAModule extends Module {
         name: "Audio Input",
         type: "audio",
         direction: "input",
-        node: this.gain,
+        node: this.node,
       }),
     );
 
@@ -48,7 +48,7 @@ export class VCAModule extends Module {
         direction: "input",
 
         controlHandler: (value) => {
-          this.gain.gain.setValueAtTime(value, this.gain.context.currentTime);
+          this.node.gain.setValueAtTime(value, this.node.context.currentTime);
         },
       }),
     );
@@ -59,12 +59,12 @@ export class VCAModule extends Module {
         name: "Audio Output",
         type: "audio",
         direction: "output",
-        node: this.gain,
+        node: this.node,
       }),
     );
   }
 
   get gainParam(): AudioParam {
-    return this.gain.gain;
+    return this.node.gain;
   }
 }

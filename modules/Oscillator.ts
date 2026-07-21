@@ -3,6 +3,8 @@ import { Port } from "../engine/Port";
 import { Parameter } from "../engine/Parameter";
 
 export class OscillatorModule extends Module {
+  private pitchCV = 0;
+
   public readonly oscillator: OscillatorNode;
 
   public readonly frequency: Parameter<number>;
@@ -32,11 +34,8 @@ export class OscillatorModule extends Module {
       }),
     );
 
-    this.frequency.onChange((value) => {
-      this.oscillator.frequency.setValueAtTime(
-        value,
-        this.oscillator.context.currentTime,
-      );
+    this.frequency.onChange(() => {
+      this.updateFrequency();
     });
 
     this.waveform = this.registerParameter(
@@ -55,16 +54,38 @@ export class OscillatorModule extends Module {
 
     this.ports.push(
       new Port({
+        id: "pitch_cv",
+        name: "Pitch CV",
+        type: "control",
+        direction: "input",
+
+        controlHandler: (value) => {
+          console.log("OSCILLATOR RECEIVED PITCH:", value);
+
+          this.pitchCV = value;
+
+          this.updateFrequency();
+        },
+      }),
+    );
+
+    this.ports.push(
+      new Port({
         id: "audio_out",
-
         name: "Audio Output",
-
         type: "audio",
-
         direction: "output",
-
         node: this.oscillator,
       }),
+    );
+  }
+
+  private updateFrequency() {
+    const frequency = this.pitchCV > 0 ? this.pitchCV : this.frequency.value;
+
+    this.oscillator.frequency.setValueAtTime(
+      frequency,
+      this.oscillator.context.currentTime,
     );
   }
 }

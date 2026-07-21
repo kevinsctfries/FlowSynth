@@ -19,6 +19,8 @@ export default function OscillatorNode(props: NodeProps) {
         <ParameterControl key={parameter.id} parameter={parameter} />
       ))}
 
+      <Handle type="target" position={Position.Left} id="pitch_cv" />
+
       <Handle id="audio_out" type="source" position={Position.Right} />
     </div>
   );

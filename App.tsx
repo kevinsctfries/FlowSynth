@@ -27,6 +27,7 @@ import FilterNode from "./ui/nodes/FilterNode";
 import ModulePanel from "./ui/ModulePanel";
 import EnvelopeNode from "./ui/nodes/EnvelopeNode";
 import GateInputNode from "./ui/nodes/GateInputNode";
+import MidiInputNode from "./ui/nodes/MidiInputNode";
 
 const nodeTypes = {
   oscillator: OscillatorNode,
@@ -35,6 +36,7 @@ const nodeTypes = {
   output: OutputNode,
   envelope: EnvelopeNode,
   gate: GateInputNode,
+  midi: MidiInputNode,
 };
 
 export default function App() {
@@ -50,9 +52,13 @@ export default function App() {
     patchRef.current = new Patch(engineRef.current);
   }
 
-  const engine = engineRef.current;
-
   const patch = patchRef.current;
+
+  if (!patch.getModule("midi-input")) {
+    patch.createModule("midi");
+  }
+
+  const engine = engineRef.current;
 
   const [nodes, setNodes] = useState<Node[]>([]);
 
@@ -95,7 +101,9 @@ export default function App() {
           y: Math.random() * 400,
         },
 
-        data: {},
+        data: {
+          midiModule: result,
+        },
       },
     ]);
   }

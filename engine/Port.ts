@@ -1,4 +1,4 @@
-import { ControlSignal } from "./Signal";
+import type { ControlSignal, GateSignal } from "./Signal";
 
 export type PortType = "audio" | "control" | "gate";
 
@@ -23,7 +23,7 @@ export class Port {
 
   public readonly signal?: ControlSignal;
 
-  public readonly gateSignal?: ControlSignal;
+  public readonly gateSignal?: GateSignal;
 
   constructor(options: {
     id: string;
@@ -41,7 +41,7 @@ export class Port {
 
     signal?: ControlSignal;
 
-    gateSignal?: ControlSignal;
+    gateSignal?: GateSignal;
   }) {
     this.id = options.id;
 

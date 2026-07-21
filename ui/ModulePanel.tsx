@@ -42,6 +42,8 @@ export default function ModulePanel({ onAddModule }: ModulePanelProps) {
       <button onClick={() => onAddModule("envelope")}>Envelope</button>
 
       <button onClick={() => onAddModule("gate")}>Gate</button>
+
+      <button onClick={() => onAddModule("midi")}>MIDI</button>
     </div>
   );
 }

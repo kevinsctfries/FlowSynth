@@ -3,21 +3,27 @@ import { Patch } from "../engine/Patch";
 
 import { OscillatorModule } from "../modules/Oscillator";
 import { FilterModule } from "../modules/Filter";
-import { GainModule } from "../modules/VCA";
+import { VCAModule } from "../modules/VCA";
 import { EnvelopeModule } from "../modules/Envelope";
+
+import type { Port } from "../engine/Port";
 
 export class Voice {
   private oscillator: OscillatorModule;
 
   private filter: FilterModule;
 
-  private gain: GainModule;
+  private vca: VCAModule;
 
   private envelope: EnvelopeModule;
 
   private patch: Patch;
 
   private active = false;
+
+  private currentNote?: number;
+
+  private pitchInput?: Port;
 
   constructor(engine: AudioEngine, index: number, output: AudioNode) {
     this.patch = new Patch(engine);
@@ -29,7 +35,7 @@ export class Voice {
 
     this.filter = new FilterModule(`voice-${index}-filter`, engine.context);
 
-    this.gain = new GainModule(`voice-${index}-gain`, engine.context);
+    this.vca = new VCAModule(`voice-${index}-vca`, engine.context);
 
     this.envelope = new EnvelopeModule(
       `voice-${index}-envelope`,
@@ -40,7 +46,7 @@ export class Voice {
 
     this.patch.addModule(this.filter);
 
-    this.patch.addModule(this.gain);
+    this.patch.addModule(this.vca);
 
     this.patch.addModule(this.envelope);
 
@@ -51,19 +57,15 @@ export class Voice {
       "audio_in",
     );
 
-    this.patch.connect(this.filter.id, "audio_out", this.gain.id, "audio_in");
+    this.patch.connect(this.filter.id, "audio_out", this.vca.id, "audio_in");
 
-    this.patch.connect(this.envelope.id, "cv_out", this.gain.id, "gain_cv");
+    this.patch.connect(this.envelope.id, "cv_out", this.vca.id, "cv_in");
 
-    this.gain.gain.connect(output);
+    this.vca.node.connect(output);
   }
 
-  noteOn(note: number, velocity: number) {
-    const frequency = 440 * Math.pow(2, (note - 69) / 12);
-
-    this.oscillator.frequency.setValue(frequency);
-
-    this.envelope.trigger(velocity / 127);
+  noteOn() {
+    this.envelope.trigger();
 
     this.active = true;
   }
@@ -72,6 +74,7 @@ export class Voice {
     this.envelope.releaseNote();
 
     this.active = false;
+    this.currentNote = undefined;
   }
 
   isActive() {

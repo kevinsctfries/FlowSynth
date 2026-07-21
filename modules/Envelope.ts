@@ -1,10 +1,16 @@
 import { Module } from "../engine/Module";
 import { Parameter } from "../engine/Parameter";
 import { Port } from "../engine/Port";
-import { ControlSignal } from "../engine/Signal";
+import { Signal } from "../engine/Signal";
 
 export class EnvelopeModule extends Module {
   private ctx: AudioContext;
+
+  private timers: number[] = [];
+
+  private attackTimer?: number;
+
+  private decayTimer?: number;
 
   public readonly attack: Parameter<number>;
 
@@ -14,7 +20,7 @@ export class EnvelopeModule extends Module {
 
   public readonly release: Parameter<number>;
 
-  public readonly outputSignal = new ControlSignal();
+  public readonly outputSignal = new Signal<number>();
 
   constructor(id: string, ctx: AudioContext) {
     super(id, "Envelope");
@@ -125,20 +131,36 @@ export class EnvelopeModule extends Module {
   }
 
   trigger(amount = 1) {
-    const now = this.ctx.currentTime;
+    for (const timer of this.timers) {
+      clearTimeout(timer);
+    }
+
+    this.timers = [];
 
     this.emit(0);
 
-    setTimeout(() => {
+    const attackTimer = window.setTimeout(() => {
       this.emit(amount);
 
-      setTimeout(() => {
+      const decayTimer = window.setTimeout(() => {
         this.emit(amount * this.sustain.value);
       }, this.decay.value * 1000);
+
+      this.timers.push(decayTimer);
     }, this.attack.value * 1000);
+
+    this.timers.push(attackTimer);
   }
 
   releaseNote() {
+    if (this.attackTimer) {
+      clearTimeout(this.attackTimer);
+    }
+
+    if (this.decayTimer) {
+      clearTimeout(this.decayTimer);
+    }
+
     this.emit(0);
   }
 }

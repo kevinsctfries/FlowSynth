@@ -26,3 +26,27 @@
 
   margin-bottom: 10px;
 }
+
+.handle-label {
+  position: relative;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.handle-label .react-flow__handle {
+  right: -8px;
+}
+
+.pitch {
+  margin-top: 10px;
+}
+
+.velocity {
+  margin-top: 10px;
+}
+
+.gate {
+  margin-top: 10px;
+}

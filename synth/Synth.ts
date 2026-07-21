@@ -27,26 +27,20 @@ export class Synth {
     this.mode = mode;
   }
 
-  noteOn(note: number, velocity: number) {
+  noteOn(note: number) {
     if (this.mode === "mono") {
       const voice = this.voices[0];
 
-      voice.noteOn(note, velocity);
+      voice.noteOn();
 
       this.noteMap.set(note, [voice]);
 
       return;
     }
 
-    const voice = this.voices.find((v) => !v.isActive());
+    const voice = this.voices.find((v) => !v.isActive()) ?? this.voices[0];
 
-    if (!voice) {
-      console.warn("No free voices");
-
-      return;
-    }
-
-    voice.noteOn(note, velocity);
+    voice.noteOn();
 
     const existing = this.noteMap.get(note) ?? [];
 

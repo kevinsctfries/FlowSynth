@@ -6,6 +6,7 @@ import { VCAModule } from "../modules/VCA";
 import { FilterModule } from "../modules/Filter";
 import { EnvelopeModule } from "../modules/Envelope";
 import { GateInputModule } from "../modules/GateInput";
+import { MidiInputModule } from "../modules/MidiInput";
 
 export function createModule(
   type: string,
@@ -25,6 +26,8 @@ export function createModule(
       return new EnvelopeModule(id, engine.context);
     case "gate":
       return new GateInputModule(id);
+    case "midi":
+      return new MidiInputModule(id);
     default:
       throw new Error(`Unknown module type ${type}`);
   }

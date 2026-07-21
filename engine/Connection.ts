@@ -117,5 +117,11 @@ export class Connection {
       "->",
       this.destination.id,
     );
+
+    if (!this.source.gateSignal || !this.destination.gateHandler) {
+      throw new Error("Invalid gate connection");
+    }
+
+    this.source.gateSignal.subscribe(this.destination.gateHandler);
   }
 }
