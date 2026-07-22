@@ -33,4 +33,8 @@ export class OutputModule extends Module {
   setVolume(value: number) {
     this.gain.gain.setValueAtTime(value, this.gain.context.currentTime);
   }
+
+  dispose() {
+    this.gain.disconnect();
+  }
 }

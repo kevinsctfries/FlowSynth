@@ -88,4 +88,9 @@ export class OscillatorModule extends Module {
       this.oscillator.context.currentTime,
     );
   }
+
+  dispose() {
+    this.oscillator.stop();
+    this.oscillator.disconnect();
+  }
 }

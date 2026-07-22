@@ -8,6 +8,7 @@ import {
   addEdge,
   applyNodeChanges,
   type NodeChange,
+  type NodeMouseHandler,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
@@ -160,6 +161,20 @@ export default function App() {
     setNodes((current) => applyNodeChanges(changes, current));
   }
 
+  function onNodesDelete(deletedNodes: Node[]) {
+    const ids = deletedNodes.map((node) => node.id);
+
+    for (const id of ids) {
+      patch.removeModule(id);
+    }
+
+    setEdges((current) =>
+      current.filter(
+        (edge) => !ids.includes(edge.source) && !ids.includes(edge.target),
+      ),
+    );
+  }
+
   function addModule(type: string) {
     const result = patch.createModule(type);
 
@@ -204,6 +219,24 @@ export default function App() {
     setEdges((current) => addEdge(connection, current));
   }
 
+  function onEdgesDelete(deletedEdges: Edge[]) {
+    for (const edge of deletedEdges) {
+      const connection = patch
+        .getConnections()
+        .find(
+          (connection) =>
+            connection.sourceModuleId === edge.source &&
+            connection.destinationModuleId === edge.target &&
+            connection.source.id === edge.sourceHandle &&
+            connection.destination.id === edge.targetHandle,
+        );
+
+      if (connection) {
+        patch.disconnect(connection);
+      }
+    }
+  }
+
   return (
     <SynthContext.Provider value={patch}>
       <div
@@ -219,6 +252,8 @@ export default function App() {
           edges={edges}
           nodeTypes={nodeTypes}
           onNodesChange={onNodesChange}
+          onEdgesDelete={onEdgesDelete}
+          onNodesDelete={onNodesDelete}
           onConnect={onConnect}
           fitView
         >

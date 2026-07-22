@@ -28,4 +28,6 @@ export abstract class Module {
 
     return parameter;
   }
+
+  dispose() {}
 }

@@ -88,4 +88,8 @@ export class VCAModule extends Module {
   get gainParam(): AudioParam {
     return this.node.gain;
   }
+
+  dispose() {
+    this.node.disconnect();
+  }
 }

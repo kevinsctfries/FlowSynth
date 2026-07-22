@@ -46,6 +46,12 @@ export class Patch {
   }
 
   removeModule(id: string) {
+    const module = this.modules.get(id);
+
+    if (!module) {
+      return;
+    }
+
     const related = this.connections.filter(
       (connection) =>
         connection.sourceModuleId === id ||
@@ -55,6 +61,8 @@ export class Patch {
     for (const connection of related) {
       this.disconnect(connection);
     }
+
+    module.dispose();
 
     this.modules.delete(id);
   }
