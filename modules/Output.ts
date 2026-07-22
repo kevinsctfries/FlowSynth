@@ -5,7 +5,7 @@ export class OutputModule extends Module {
   public readonly gain: GainNode;
 
   constructor(id: string, ctx: AudioContext) {
-    super(id, "Output");
+    super(id, "output", "Output");
 
     this.gain = ctx.createGain();
 

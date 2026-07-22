@@ -7,7 +7,7 @@ export class GateInputModule extends Module {
   private isOpen = false;
 
   constructor(id: string) {
-    super(id, "Gate Input");
+    super(id, "gate", "Gate Input");
 
     this.ports.push(
       new Port({

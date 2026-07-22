@@ -16,14 +16,12 @@ export class Patch {
     this.engine = engine;
   }
 
-  /** Registers an already-constructed module (e.g. one built directly by a Voice). */
   addModule(module: Module) {
     this.modules.set(module.id, module);
 
     return module;
   }
 
-  /** Builds a module from a type string via the ModuleFactory and registers it. */
   createModule(type: string, id?: string) {
     const moduleId = id ?? `${type}-${this.idCounter++}`;
 
@@ -33,6 +31,16 @@ export class Patch {
   }
 
   removeModule(id: string) {
+    const related = this.connections.filter(
+      (connection) =>
+        connection.sourceModuleId === id ||
+        connection.destinationModuleId === id,
+    );
+
+    for (const connection of related) {
+      this.disconnect(connection);
+    }
+
     this.modules.delete(id);
   }
 
@@ -70,7 +78,12 @@ export class Patch {
       throw new Error(`Missing target port ${targetPortId}`);
     }
 
-    const connection = new Connection(sourcePort, targetPort);
+    const connection = new Connection(
+      sourcePort,
+      targetPort,
+      sourceModuleId,
+      targetModuleId,
+    );
 
     connection.connect();
 
@@ -91,6 +104,14 @@ export class Patch {
     this.connections.push(connection);
 
     return connection;
+  }
+
+  getConnections(): Connection[] {
+    return [...this.connections];
+  }
+
+  getModules(): Module[] {
+    return [...this.modules.values()];
   }
 
   disconnect(connection: Connection) {

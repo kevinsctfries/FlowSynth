@@ -8,7 +8,7 @@ export class VCAModule extends Module {
   public readonly level: Parameter<number>;
 
   constructor(id: string, ctx: AudioContext) {
-    super(id, "VCA");
+    super(id, "vca", "VCA");
 
     this.node = ctx.createGain();
 

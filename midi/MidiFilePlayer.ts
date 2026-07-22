@@ -1,161 +1,161 @@
-import { Midi } from "@tonejs/midi";
-import { Synth } from "../synth/Synth";
+// import { Midi } from "@tonejs/midi";
+// import { Synth } from "../synth/Synth";
 
-type MidiEvent = {
-  time: number;
-  type: "on" | "off";
-  note: number;
-  velocity: number;
-};
+// type MidiEvent = {
+//   time: number;
+//   type: "on" | "off";
+//   note: number;
+//   velocity: number;
+// };
 
-export class MidiFilePlayer {
-  private synth: Synth;
+// export class MidiFilePlayer {
+//   private synth: Synth;
 
-  private events: MidiEvent[] = [];
+//   private events: MidiEvent[] = [];
 
-  private timers: number[] = [];
+//   private timers: number[] = [];
 
-  private duration = 0;
+//   private duration = 0;
 
-  private position = 0;
+//   private position = 0;
 
-  private startTime = 0;
+//   private startTime = 0;
 
-  private playing = false;
+//   private playing = false;
 
-  private paused = false;
+//   private paused = false;
 
-  constructor(synth: Synth) {
-    this.synth = synth;
-  }
+//   constructor(synth: Synth) {
+//     this.synth = synth;
+//   }
 
-  async load(file: File) {
-    const buffer = await file.arrayBuffer();
+//   async load(file: File) {
+//     const buffer = await file.arrayBuffer();
 
-    const midi = new Midi(buffer);
+//     const midi = new Midi(buffer);
 
-    this.events = [];
+//     this.events = [];
 
-    this.duration = midi.duration;
+//     this.duration = midi.duration;
 
-    for (const track of midi.tracks) {
-      for (const note of track.notes) {
-        this.events.push({
-          time: note.time,
+//     for (const track of midi.tracks) {
+//       for (const note of track.notes) {
+//         this.events.push({
+//           time: note.time,
 
-          type: "on",
+//           type: "on",
 
-          note: note.midi,
+//           note: note.midi,
 
-          velocity: note.velocity * 127,
-        });
+//           velocity: note.velocity * 127,
+//         });
 
-        this.events.push({
-          time: note.time + note.duration,
+//         this.events.push({
+//           time: note.time + note.duration,
 
-          type: "off",
+//           type: "off",
 
-          note: note.midi,
+//           note: note.midi,
 
-          velocity: 0,
-        });
-      }
-    }
+//           velocity: 0,
+//         });
+//       }
+//     }
 
-    this.events.sort((a, b) => a.time - b.time);
+//     this.events.sort((a, b) => a.time - b.time);
 
-    this.position = 0;
-  }
+//     this.position = 0;
+//   }
 
-  play() {
-    if (this.playing) {
-      return;
-    }
+//   play() {
+//     if (this.playing) {
+//       return;
+//     }
 
-    this.playing = true;
+//     this.playing = true;
 
-    this.paused = false;
+//     this.paused = false;
 
-    this.startTime = performance.now() - this.position * 1000;
+//     this.startTime = performance.now() - this.position * 1000;
 
-    for (const event of this.events) {
-      if (event.time < this.position) {
-        continue;
-      }
+//     for (const event of this.events) {
+//       if (event.time < this.position) {
+//         continue;
+//       }
 
-      const delay = (event.time - this.position) * 1000;
+//       const delay = (event.time - this.position) * 1000;
 
-      const timer = window.setTimeout(() => {
-        if (!this.playing) {
-          return;
-        }
+//       const timer = window.setTimeout(() => {
+//         if (!this.playing) {
+//           return;
+//         }
 
-        if (event.type === "on") {
-          this.synth.noteOn(event.note, event.velocity);
-        } else {
-          this.synth.noteOff(event.note);
-        }
-      }, delay);
+//         if (event.type === "on") {
+//           this.synth.noteOn(event.note, event.velocity);
+//         } else {
+//           this.synth.noteOff(event.note);
+//         }
+//       }, delay);
 
-      this.timers.push(timer);
-    }
-  }
+//       this.timers.push(timer);
+//     }
+//   }
 
-  pause() {
-    this.playing = false;
+//   pause() {
+//     this.playing = false;
 
-    this.paused = true;
+//     this.paused = true;
 
-    this.updatePosition();
+//     this.updatePosition();
 
-    this.clearTimers();
-  }
+//     this.clearTimers();
+//   }
 
-  stop() {
-    this.playing = false;
+//   stop() {
+//     this.playing = false;
 
-    this.paused = false;
+//     this.paused = false;
 
-    this.position = 0;
+//     this.position = 0;
 
-    this.clearTimers();
-  }
+//     this.clearTimers();
+//   }
 
-  restart() {
-    this.stop();
+//   restart() {
+//     this.stop();
 
-    this.play();
-  }
+//     this.play();
+//   }
 
-  seek(seconds: number) {
-    this.stop();
+//   seek(seconds: number) {
+//     this.stop();
 
-    this.position = seconds;
+//     this.position = seconds;
 
-    this.play();
-  }
+//     this.play();
+//   }
 
-  getPosition() {
-    if (this.playing) {
-      return (performance.now() - this.startTime) / 1000;
-    }
+//   getPosition() {
+//     if (this.playing) {
+//       return (performance.now() - this.startTime) / 1000;
+//     }
 
-    return this.position;
-  }
+//     return this.position;
+//   }
 
-  getDuration() {
-    return this.duration;
-  }
+//   getDuration() {
+//     return this.duration;
+//   }
 
-  private updatePosition() {
-    this.position = this.getPosition();
-  }
+//   private updatePosition() {
+//     this.position = this.getPosition();
+//   }
 
-  private clearTimers() {
-    for (const timer of this.timers) {
-      clearTimeout(timer);
-    }
+//   private clearTimers() {
+//     for (const timer of this.timers) {
+//       clearTimeout(timer);
+//     }
 
-    this.timers = [];
-  }
-}
+//     this.timers = [];
+//   }
+// }

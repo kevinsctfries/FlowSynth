@@ -11,11 +11,18 @@ type MidiDevice = {
 type MidiInputNodeData = {
   midiModule: {
     getDevices(): MIDIInput[];
+
     selectDevice(id: string): void;
+
     initialized: boolean;
+
     devicesChanged: {
       subscribe(callback: (devices: MIDIInput[]) => void): () => void;
     };
+  };
+
+  synth: {
+    setMode(mode: "mono" | "poly"): void;
   };
 };
 
@@ -25,6 +32,8 @@ type Props = {
 
 export default function MidiInputNode({ data }: Props) {
   const [devices, setDevices] = useState<MidiDevice[]>([]);
+
+  const [mode, setMode] = useState<"mono" | "poly">("poly");
 
   useEffect(() => {
     const midi = data.midiModule;
@@ -50,15 +59,23 @@ export default function MidiInputNode({ data }: Props) {
     return unsubscribe;
   }, [data.midiModule]);
 
-  function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
+  function handleDeviceChange(event: React.ChangeEvent<HTMLSelectElement>) {
     data.midiModule.selectDevice(event.target.value);
+  }
+
+  function handleModeChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const selected = event.target.value as "mono" | "poly";
+
+    setMode(selected);
+
+    data.synth.setMode(selected);
   }
 
   return (
     <div className="synth-node">
       <h3>MIDI Input</h3>
 
-      <select onChange={handleChange}>
+      <select onChange={handleDeviceChange}>
         <option value="">Select MIDI device</option>
 
         {devices.map((device) => (
@@ -67,6 +84,32 @@ export default function MidiInputNode({ data }: Props) {
           </option>
         ))}
       </select>
+
+      <div>
+        <label>
+          <input
+            type="radio"
+            name="voice-mode"
+            value="poly"
+            checked={mode === "poly"}
+            onChange={handleModeChange}
+          />
+          Poly
+        </label>
+      </div>
+
+      <div>
+        <label>
+          <input
+            type="radio"
+            name="voice-mode"
+            value="mono"
+            checked={mode === "mono"}
+            onChange={handleModeChange}
+          />
+          Mono
+        </label>
+      </div>
 
       <div className="handle-label pitch">
         Pitch

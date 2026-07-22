@@ -3,16 +3,15 @@ import { Parameter } from "./Parameter";
 
 export abstract class Module {
   public readonly id: string;
-
+  public readonly type: string;
   public readonly name: string;
 
   public ports: Port[] = [];
-
   public parameters: Parameter<any>[] = [];
 
-  constructor(id: string, name: string) {
+  constructor(id: string, type: string, name: string) {
     this.id = id;
-
+    this.type = type;
     this.name = name;
   }
 

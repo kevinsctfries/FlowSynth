@@ -9,10 +9,10 @@ export class FilterModule extends Module {
 
   public readonly resonance: Parameter<number>;
 
-  public readonly type: Parameter<BiquadFilterType>;
+  public readonly filterType: Parameter<BiquadFilterType>;
 
   constructor(id: string, ctx: AudioContext) {
-    super(id, "Filter");
+    super(id, "filter", "Filter");
 
     this.filter = ctx.createBiquadFilter();
 
@@ -57,7 +57,7 @@ export class FilterModule extends Module {
       this.filter.Q.setValueAtTime(value, this.filter.context.currentTime);
     });
 
-    this.type = this.registerParameter(
+    this.filterType = this.registerParameter(
       new Parameter<BiquadFilterType>({
         id: "type",
         name: "Type",
@@ -67,20 +67,16 @@ export class FilterModule extends Module {
       }),
     );
 
-    this.type.onChange((value) => {
+    this.filterType.onChange((value) => {
       this.filter.type = value;
     });
 
     this.ports.push(
       new Port({
         id: "audio_in",
-
         name: "Audio Input",
-
         type: "audio",
-
         direction: "input",
-
         node: this.filter,
       }),
     );
@@ -88,13 +84,9 @@ export class FilterModule extends Module {
     this.ports.push(
       new Port({
         id: "audio_out",
-
         name: "Audio Output",
-
         type: "audio",
-
         direction: "output",
-
         node: this.filter,
       }),
     );

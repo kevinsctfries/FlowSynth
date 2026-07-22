@@ -23,7 +23,7 @@ export class EnvelopeModule extends Module {
   public readonly outputSignal = new Signal<number>();
 
   constructor(id: string, ctx: AudioContext) {
-    super(id, "Envelope");
+    super(id, "envelope", "Envelope");
 
     this.ctx = ctx;
 
@@ -99,25 +99,11 @@ export class EnvelopeModule extends Module {
     );
   }
 
-  // private emit(value: number) {
-  //   for (const listener of this.listeners) {
-  //     listener(value);
-  //   }
-  // }
-
   private emit(value: number) {
     console.log("Envelope CV output:", value);
 
     this.outputSignal.emit(value);
   }
-
-  // setGateState(value: boolean) {
-  //   if (value) {
-  //     this.trigger();
-  //   } else {
-  //     this.releaseNote();
-  //   }
-  // }
 
   setGateState(value: boolean) {
     console.log("Envelope gate received:", value);

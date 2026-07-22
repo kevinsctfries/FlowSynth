@@ -12,7 +12,7 @@ export class OscillatorModule extends Module {
   public readonly waveform: Parameter<OscillatorType>;
 
   constructor(id: string, ctx: AudioContext) {
-    super(id, "Oscillator");
+    super(id, "oscillator", "Oscillator");
 
     this.oscillator = ctx.createOscillator();
 

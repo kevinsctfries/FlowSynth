@@ -2,6 +2,13 @@ import { Module } from "../engine/Module";
 import { Port } from "../engine/Port";
 import { Signal } from "../engine/Signal";
 
+export type NoteEvent = {
+  note: number;
+  frequency: number;
+  velocity: number;
+  on: boolean;
+};
+
 export class MidiInputModule extends Module {
   private midiAccess?: MIDIAccess;
 
@@ -15,13 +22,21 @@ export class MidiInputModule extends Module {
 
   public readonly velocitySignal = new Signal<number>();
 
+  public readonly noteEvents = new Signal<NoteEvent>();
+
   public readonly devicesChanged = new Signal<MIDIInput[]>();
 
   public initialized = false;
 
   constructor(id: string) {
-    super(id, "MIDI Input");
+    super(id, "midi", "MIDI Input");
 
+    this.registerPorts();
+
+    this.init();
+  }
+
+  private registerPorts() {
     this.ports.push(
       new Port({
         id: "gate_out",
@@ -51,8 +66,6 @@ export class MidiInputModule extends Module {
         signal: this.velocitySignal,
       }),
     );
-
-    this.init();
   }
 
   private async init() {
@@ -70,6 +83,7 @@ export class MidiInputModule extends Module {
 
     this.devicesChanged.emit(devices);
   }
+
   getDevices() {
     return Array.from(this.midiAccess?.inputs.values() ?? []);
   }
@@ -110,38 +124,67 @@ export class MidiInputModule extends Module {
 
     const command = status & 0xf0;
 
-    if (command === 0x90 && velocity > 0) {
-      if (this.activeNotes.has(note)) {
-        return;
-      }
+    const isNoteOn = command === 0x90 && velocity > 0;
 
-      this.activeNotes.add(note);
+    const isNoteOff = command === 0x80 || (command === 0x90 && velocity === 0);
 
-      const frequency = 440 * Math.pow(2, (note - 69) / 12);
-
-      console.log("MIDI NOTE ON:", note, velocity);
-
-      console.log("PITCH OUTPUT:", frequency);
-
-      this.pitchSignal.emit(frequency);
-
-      this.velocitySignal.emit(velocity / 127);
-
-      this.gateSignal.emit(true);
-
+    if (isNoteOn) {
+      this.handleNoteOn(note, velocity);
       return;
     }
 
-    if (command === 0x80 || (command === 0x90 && velocity === 0)) {
-      if (!this.activeNotes.has(note)) {
-        return;
-      }
-
-      this.activeNotes.delete(note);
-
-      console.log("MIDI NOTE OFF:", note);
-
-      this.gateSignal.emit(false);
+    if (isNoteOff) {
+      this.handleNoteOff(note);
     }
+  }
+
+  private handleNoteOn(note: number, velocity: number) {
+    if (this.activeNotes.has(note)) {
+      return;
+    }
+
+    this.activeNotes.add(note);
+
+    const frequency = this.noteToFrequency(note);
+
+    console.log("MIDI NOTE ON:", note, velocity);
+
+    console.log("PITCH OUTPUT:", frequency);
+
+    this.pitchSignal.emit(frequency);
+
+    this.velocitySignal.emit(velocity / 127);
+
+    this.gateSignal.emit(true);
+
+    this.noteEvents.emit({
+      note,
+      frequency,
+      velocity: velocity / 127,
+      on: true,
+    });
+  }
+
+  private handleNoteOff(note: number) {
+    if (!this.activeNotes.has(note)) {
+      return;
+    }
+
+    this.activeNotes.delete(note);
+
+    console.log("MIDI NOTE OFF:", note);
+
+    this.gateSignal.emit(false);
+
+    this.noteEvents.emit({
+      note,
+      frequency: 0,
+      velocity: 0,
+      on: false,
+    });
+  }
+
+  private noteToFrequency(note: number): number {
+    return 440 * Math.pow(2, (note - 69) / 12);
   }
 }
