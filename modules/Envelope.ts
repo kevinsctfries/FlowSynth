@@ -3,20 +3,36 @@ import { Parameter } from "../engine/Parameter";
 import { Port } from "../engine/Port";
 import { Signal } from "../engine/Signal";
 
+type Stage = "idle" | "attack" | "decay" | "sustain" | "release";
+
 export class EnvelopeModule extends Module {
   private ctx: AudioContext;
 
-  private timers: number[] = [];
+  private stage: Stage = "idle";
+
+  private stageStartTime = 0;
+
+  private stageStartValue = 0;
+
+  private currentValue = 0;
+
+  private triggerAmount = 1;
+
+  private schedulerHandle?: number;
 
   public readonly attack: Parameter<number>;
+
   public readonly decay: Parameter<number>;
+
   public readonly sustain: Parameter<number>;
+
   public readonly release: Parameter<number>;
 
-  public readonly outputSignal = new Signal<number>();
+  public readonly outputSignal = new Signal<number>(0);
 
   constructor(id: string, ctx: AudioContext) {
     super(id, "envelope", "Envelope");
+
     this.ctx = ctx;
 
     this.attack = this.registerParameter(
@@ -73,7 +89,6 @@ export class EnvelopeModule extends Module {
         name: "Gate Input",
         type: "gate",
         direction: "input",
-
         gateHandler: (value) => {
           this.setGateState(value);
         },
@@ -91,45 +106,105 @@ export class EnvelopeModule extends Module {
     );
   }
 
-  private emit(value: number) {
-    this.outputSignal.emit(value);
-  }
-
   setGateState(value: boolean) {
     if (value) {
       this.trigger();
       return;
     }
+
     this.releaseNote();
   }
 
-  private clearTimers() {
-    for (const timer of this.timers) {
-      clearTimeout(timer);
-    }
-    this.timers = [];
-  }
-
   trigger(amount = 1) {
-    this.clearTimers();
-
-    this.emit(0);
-
-    const attackTimer = window.setTimeout(() => {
-      this.emit(amount);
-
-      const decayTimer = window.setTimeout(() => {
-        this.emit(amount * this.sustain.value);
-      }, this.decay.value * 1000);
-
-      this.timers.push(decayTimer);
-    }, this.attack.value * 1000);
-
-    this.timers.push(attackTimer);
+    this.triggerAmount = amount;
+    this.beginStage("attack");
   }
 
   releaseNote() {
-    this.clearTimers();
-    this.emit(0);
+    this.beginStage("release");
+  }
+
+  private beginStage(stage: Stage) {
+    this.stage = stage;
+    this.stageStartTime = this.ctx.currentTime;
+    this.stageStartValue = this.currentValue;
+    this.startScheduler();
+  }
+
+  private startScheduler() {
+    if (this.schedulerHandle !== undefined) {
+      return;
+    }
+
+    const tick = () => {
+      this.advance();
+
+      const stillRunning =
+        this.stage === "attack" ||
+        this.stage === "decay" ||
+        this.stage === "release";
+
+      this.schedulerHandle = stillRunning
+        ? window.setTimeout(tick, 15)
+        : undefined;
+    };
+
+    tick();
+  }
+
+  private advance() {
+    const elapsed = this.ctx.currentTime - this.stageStartTime;
+
+    if (this.stage === "attack") {
+      const duration = this.attack.value;
+      const target = this.triggerAmount;
+
+      if (duration <= 0 || elapsed >= duration) {
+        this.emit(target);
+        this.stage = "decay";
+        this.stageStartTime = this.ctx.currentTime;
+        this.stageStartValue = target;
+        return;
+      }
+
+      this.emit(this.lerp(this.stageStartValue, target, elapsed / duration));
+      return;
+    }
+
+    if (this.stage === "decay") {
+      const duration = this.decay.value;
+      const target = this.triggerAmount * this.sustain.value;
+
+      if (duration <= 0 || elapsed >= duration) {
+        this.emit(target);
+        this.stage = "sustain";
+        return;
+      }
+
+      this.emit(this.lerp(this.stageStartValue, target, elapsed / duration));
+      return;
+    }
+
+    if (this.stage === "release") {
+      const duration = this.release.value;
+
+      if (duration <= 0 || elapsed >= duration) {
+        this.emit(0);
+        this.stage = "idle";
+        return;
+      }
+
+      this.emit(this.lerp(this.stageStartValue, 0, elapsed / duration));
+    }
+  }
+
+  private lerp(from: number, to: number, t: number): number {
+    const clamped = Math.min(Math.max(t, 0), 1);
+    return from + (to - from) * clamped;
+  }
+
+  private emit(value: number) {
+    this.currentValue = value;
+    this.outputSignal.emit(value);
   }
 }
