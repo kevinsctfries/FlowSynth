@@ -13,7 +13,8 @@ type ClonedVoice = PortHandlers & { moduleIds: string[] };
 export class VoiceEngine {
   private patch: Patch;
   private midi: MidiInputModule;
-  private allocator: VoiceAllocator = new VoiceAllocator(1);
+  private allocator: VoiceAllocator = new VoiceAllocator(4);
+  private currentMode: VoiceMode = "poly";
 
   private templateModuleIds: string[] = [];
   private templateInputs: {
@@ -39,7 +40,11 @@ export class VoiceEngine {
   }
 
   setMode(mode: VoiceMode) {
-    this.allocator.setMode(mode);
+    console.log("VOICE ENGINE MODE:", mode);
+
+    this.currentMode = mode;
+
+    this.rebuildFromPatch(mode === "poly" ? 4 : 1);
   }
 
   rebuildFromPatch(voiceCount: number) {
@@ -49,11 +54,13 @@ export class VoiceEngine {
 
   setVoiceCount(count: number) {
     this.teardownClones();
+
     this.allocator = new VoiceAllocator(count);
+    this.allocator.setMode(this.currentMode);
 
-    this.voices = [this.bindVoice(this.templateModuleIds, true)];
+    this.voices = [];
 
-    for (let i = 1; i < count; i++) {
+    for (let i = 0; i < count; i++) {
       this.voices.push(this.cloneTemplate());
     }
   }
@@ -66,6 +73,15 @@ export class VoiceEngine {
   }) {
     if (event.on) {
       const { voice } = this.allocator.noteOn(event.note);
+
+      console.log(
+        "NOTE",
+        event.note,
+        "ASSIGNED VOICE",
+        voice,
+        "TOTAL VOICES",
+        this.voices.length,
+      );
       const target = this.voices[voice];
       target?.pitchHandler?.(event.frequency);
       target?.velocityHandler?.(event.velocity);
@@ -141,15 +157,6 @@ export class VoiceEngine {
     }
 
     this.templateModuleIds = [...visited];
-
-    for (const conn of connections) {
-      if (
-        conn.sourceModuleId === this.midi.id &&
-        this.templateModuleIds.includes(conn.destinationModuleId)
-      ) {
-        this.patch.disconnect(conn);
-      }
-    }
   }
 
   private bindVoice(moduleIds: string[], isOriginal: boolean): ClonedVoice {
@@ -191,8 +198,7 @@ export class VoiceEngine {
     for (const conn of this.patch.getConnections()) {
       if (
         idMap.has(conn.sourceModuleId) &&
-        idMap.has(conn.destinationModuleId) &&
-        this.templateModuleIds.includes(conn.sourceModuleId)
+        idMap.has(conn.destinationModuleId)
       ) {
         this.patch.connect(
           idMap.get(conn.sourceModuleId)!,
@@ -217,11 +223,12 @@ export class VoiceEngine {
   }
 
   private teardownClones() {
-    for (const voice of this.voices.slice(1)) {
+    for (const voice of this.voices) {
       for (const moduleId of voice.moduleIds) {
         this.patch.removeModule(moduleId);
       }
     }
+
     this.voices = [];
   }
 

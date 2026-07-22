@@ -17,6 +17,8 @@ export class VoiceAllocator {
   }
 
   setMode(mode: VoiceMode) {
+    console.log("ALLOCATOR MODE:", mode);
+
     this.mode = mode;
   }
 

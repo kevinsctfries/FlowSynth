@@ -7,21 +7,21 @@ export class VCAModule extends Module {
 
   public readonly level: Parameter<number>;
 
-  private gateOpen = true;
+  private gateOpen = false;
 
   constructor(id: string, ctx: AudioContext) {
     super(id, "vca", "VCA");
 
     this.node = ctx.createGain();
 
-    this.node.gain.value = 0;
+    this.node.gain.value = 0.5;
 
     this.level = this.registerParameter(
       new Parameter({
         id: "level",
         name: "Level",
         type: "number",
-        value: 0,
+        value: 0.5,
         min: 0,
         max: 1,
         step: 0.01,

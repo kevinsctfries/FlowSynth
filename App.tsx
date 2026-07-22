@@ -54,10 +54,6 @@ export default function App() {
 
   const patch = patchRef.current;
 
-  if (!patch.getModule("midi-input")) {
-    patch.createModule("midi");
-  }
-
   const engine = engineRef.current;
 
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -79,6 +75,27 @@ export default function App() {
       window.removeEventListener("click", unlockAudio);
     };
   }, [engine]);
+
+  useEffect(() => {
+    if (!patch.getModules().some((m) => m.type === "midi")) {
+      const midi = patch.createModule("midi");
+
+      setNodes([
+        {
+          id: midi.id,
+          type: "midi",
+          position: {
+            x: 100,
+            y: 100,
+          },
+          data: {
+            midiModule: midi,
+            patch,
+          },
+        },
+      ]);
+    }
+  }, [patch]);
 
   function onNodesChange(changes: NodeChange[]) {
     setNodes((current) => applyNodeChanges(changes, current));
@@ -103,6 +120,7 @@ export default function App() {
 
         data: {
           midiModule: result,
+          patch,
         },
       },
     ]);

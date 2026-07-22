@@ -21,8 +21,8 @@ type MidiInputNodeData = {
     };
   };
 
-  synth: {
-    setMode(mode: "mono" | "poly"): void;
+  patch: {
+    setVoiceMode(mode: "mono" | "poly"): void;
   };
 };
 
@@ -68,7 +68,7 @@ export default function MidiInputNode({ data }: Props) {
 
     setMode(selected);
 
-    data.synth.setMode(selected);
+    data.patch.setVoiceMode(selected);
   }
 
   return (

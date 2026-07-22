@@ -2,6 +2,9 @@ import { AudioEngine } from "./AudioEngine";
 import { Module } from "./Module";
 import { Connection } from "./Connection";
 import { createModule } from "../factory/ModuleFactory";
+import { VoiceEngine } from "./VoiceEngine";
+import type { VoiceMode } from "./VoiceAllocator";
+import { MidiInputModule } from "../modules/MidiInput";
 
 export class Patch {
   private engine: AudioEngine;
@@ -11,6 +14,10 @@ export class Patch {
   private connections: Connection[] = [];
 
   private idCounter = 0;
+
+  private voiceEngine?: VoiceEngine;
+
+  private voiceCount = 4;
 
   constructor(engine: AudioEngine) {
     this.engine = engine;
@@ -27,7 +34,15 @@ export class Patch {
 
     const module = createModule(type, moduleId, this.engine);
 
-    return this.addModule(module);
+    this.addModule(module);
+
+    if (type === "midi") {
+      this.voiceEngine = new VoiceEngine(this, module as MidiInputModule);
+
+      this.voiceEngine.rebuildFromPatch(this.voiceCount);
+    }
+
+    return module;
   }
 
   removeModule(id: string) {
@@ -87,7 +102,11 @@ export class Patch {
 
     connection.connect();
 
-    if (sourcePort.type === "gate" && targetPort.type === "gate") {
+    if (
+      sourceModule.type !== "midi" &&
+      sourcePort.type === "gate" &&
+      targetPort.type === "gate"
+    ) {
       const sourceGate = sourceModule as Module & {
         subscribe?: (callback: (value: boolean) => void) => () => void;
       };
@@ -118,5 +137,13 @@ export class Patch {
     connection.disconnect();
 
     this.connections = this.connections.filter((item) => item !== connection);
+  }
+
+  setVoiceMode(mode: VoiceMode) {
+    console.log("PATCH MODE:", mode);
+
+    this.voiceCount = mode === "poly" ? 4 : 1;
+
+    this.voiceEngine?.setMode(mode);
   }
 }
