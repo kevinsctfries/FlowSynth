@@ -15,7 +15,6 @@ import "@xyflow/react/dist/style.css";
 import { useEffect, useState, useRef } from "react";
 
 import { AudioEngine } from "./engine/AudioEngine";
-
 import { Patch } from "./engine/Patch";
 
 import { SynthContext } from "./context/SynthContext";
@@ -28,6 +27,8 @@ import ModulePanel from "./ui/ModulePanel";
 import EnvelopeNode from "./ui/nodes/EnvelopeNode";
 import GateInputNode from "./ui/nodes/GateInputNode";
 import MidiInputNode from "./ui/nodes/MidiInputNode";
+
+import { ProjectStorage } from "./persistence/ProjectStorage";
 
 const nodeTypes = {
   oscillator: OscillatorNode,
@@ -52,18 +53,15 @@ export default function App() {
     patchRef.current = new Patch(engineRef.current);
   }
 
+  const engine = engineRef.current;
   const patch = patchRef.current;
 
-  const engine = engineRef.current;
-
   const [nodes, setNodes] = useState<Node[]>([]);
-
   const [edges, setEdges] = useState<Edge[]>([]);
 
   useEffect(() => {
     const unlockAudio = async () => {
       await engine.start();
-
       console.log("Audio unlocked");
     };
 
@@ -77,25 +75,86 @@ export default function App() {
   }, [engine]);
 
   useEffect(() => {
-    if (!patch.getModules().some((m) => m.type === "midi")) {
-      const midi = patch.createModule("midi");
+    const saved = ProjectStorage.load();
 
-      setNodes([
-        {
-          id: midi.id,
-          type: "midi",
-          position: {
-            x: 100,
-            y: 100,
-          },
+    if (saved) {
+      const restoredNodes: Node[] = [];
+
+      for (const module of saved.modules) {
+        const created = patch.createModule(module.type, module.id);
+
+        restoredNodes.push({
+          id: created.id,
+
+          type: module.type,
+
+          position: module.position,
+
           data: {
-            midiModule: midi,
+            midiModule: created.type === "midi" ? created : undefined,
+
             patch,
           },
-        },
-      ]);
+        });
+      }
+
+      for (const connection of saved.connections) {
+        patch.connect(
+          connection.source,
+
+          connection.sourceHandle,
+
+          connection.target,
+
+          connection.targetHandle,
+        );
+      }
+
+      setNodes(restoredNodes);
+
+      setEdges(
+        saved.connections.map((connection, index) => ({
+          id: `edge-${index}`,
+
+          source: connection.source,
+
+          sourceHandle: connection.sourceHandle,
+
+          target: connection.target,
+
+          targetHandle: connection.targetHandle,
+        })),
+      );
+
+      return;
     }
+
+    const midi = patch.createModule("midi");
+
+    setNodes([
+      {
+        id: midi.id,
+
+        type: "midi",
+
+        position: {
+          x: 100,
+          y: 100,
+        },
+
+        data: {
+          midiModule: midi,
+          patch,
+        },
+      },
+    ]);
   }, [patch]);
+
+  useEffect(() => {
+    if (nodes.length > 0) {
+      ProjectStorage.save(nodes, edges);
+    }
+  }, [nodes, edges]);
 
   function onNodesChange(changes: NodeChange[]) {
     setNodes((current) => applyNodeChanges(changes, current));
@@ -119,7 +178,8 @@ export default function App() {
         },
 
         data: {
-          midiModule: result,
+          midiModule: result.type === "midi" ? result : undefined,
+
           patch,
         },
       },
@@ -133,8 +193,11 @@ export default function App() {
 
     patch.connect(
       connection.source,
+
       connection.sourceHandle!,
+
       connection.target,
+
       connection.targetHandle!,
     );
 
@@ -146,7 +209,6 @@ export default function App() {
       <div
         style={{
           width: "100vw",
-
           height: "100vh",
         }}
       >
