@@ -24,6 +24,8 @@ export default function VCANode(props: NodeProps) {
       <Handle id="audio_out" type="source" position={Position.Right} />
 
       <Handle id="cv_in" type="target" position={Position.Top} />
+
+      <Handle id="gate_in" type="target" position={Position.Bottom} />
     </div>
   );
 }

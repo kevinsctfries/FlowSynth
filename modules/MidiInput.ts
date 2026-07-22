@@ -16,7 +16,7 @@ export class MidiInputModule extends Module {
 
   private activeNotes = new Set<number>();
 
-  public readonly gateSignal = new Signal<boolean>();
+  public readonly gateSignal = new Signal<boolean>(false);
 
   public readonly pitchSignal = new Signal<number>();
 

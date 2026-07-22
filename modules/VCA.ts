@@ -7,27 +7,29 @@ export class VCAModule extends Module {
 
   public readonly level: Parameter<number>;
 
+  private gateOpen = true;
+
   constructor(id: string, ctx: AudioContext) {
     super(id, "vca", "VCA");
 
     this.node = ctx.createGain();
 
-    this.node.gain.value = 1;
+    this.node.gain.value = 0;
 
     this.level = this.registerParameter(
       new Parameter({
         id: "level",
         name: "Level",
         type: "number",
-        value: 1,
+        value: 0,
         min: 0,
         max: 1,
         step: 0.01,
       }),
     );
 
-    this.level.onChange((value) => {
-      this.node.gain.setValueAtTime(value, this.node.context.currentTime);
+    this.level.onChange(() => {
+      this.applyGain();
     });
 
     this.ports.push(
@@ -55,6 +57,20 @@ export class VCAModule extends Module {
 
     this.ports.push(
       new Port({
+        id: "gate_in",
+        name: "Gate Input",
+        type: "gate",
+        direction: "input",
+
+        gateHandler: (value) => {
+          this.gateOpen = value;
+          this.applyGain();
+        },
+      }),
+    );
+
+    this.ports.push(
+      new Port({
         id: "audio_out",
         name: "Audio Output",
         type: "audio",
@@ -62,6 +78,11 @@ export class VCAModule extends Module {
         node: this.node,
       }),
     );
+  }
+
+  private applyGain() {
+    const target = this.gateOpen ? this.level.value : 0;
+    this.node.gain.setValueAtTime(target, this.node.context.currentTime);
   }
 
   get gainParam(): AudioParam {

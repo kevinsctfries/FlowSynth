@@ -8,23 +8,15 @@ export class EnvelopeModule extends Module {
 
   private timers: number[] = [];
 
-  private attackTimer?: number;
-
-  private decayTimer?: number;
-
   public readonly attack: Parameter<number>;
-
   public readonly decay: Parameter<number>;
-
   public readonly sustain: Parameter<number>;
-
   public readonly release: Parameter<number>;
 
   public readonly outputSignal = new Signal<number>();
 
   constructor(id: string, ctx: AudioContext) {
     super(id, "envelope", "Envelope");
-
     this.ctx = ctx;
 
     this.attack = this.registerParameter(
@@ -100,28 +92,26 @@ export class EnvelopeModule extends Module {
   }
 
   private emit(value: number) {
-    console.log("Envelope CV output:", value);
-
     this.outputSignal.emit(value);
   }
 
   setGateState(value: boolean) {
-    console.log("Envelope gate received:", value);
-
     if (value) {
       this.trigger();
       return;
     }
-
     this.releaseNote();
   }
 
-  trigger(amount = 1) {
+  private clearTimers() {
     for (const timer of this.timers) {
       clearTimeout(timer);
     }
-
     this.timers = [];
+  }
+
+  trigger(amount = 1) {
+    this.clearTimers();
 
     this.emit(0);
 
@@ -139,14 +129,7 @@ export class EnvelopeModule extends Module {
   }
 
   releaseNote() {
-    if (this.attackTimer) {
-      clearTimeout(this.attackTimer);
-    }
-
-    if (this.decayTimer) {
-      clearTimeout(this.decayTimer);
-    }
-
+    this.clearTimers();
     this.emit(0);
   }
 }
